@@ -1,4 +1,4 @@
-FROM php:8.0-fpm-buster
+FROM php:7.4-fpm-buster
 LABEL maintainer="ucan-lab <yes@u-can.pro>"
 SHELL ["/bin/bash", "-oeux", "pipefail", "-c"]
 
@@ -15,7 +15,7 @@ ENV TZ=UTC \
 COPY --from=composer:2.0 /usr/bin/composer /usr/bin/composer
 
 RUN apt-get update && \
-  apt-get -y install git libicu-dev libonig-dev libzip-dev unzip locales && \
+  apt-get -y install git libicu-dev libonig-dev libzip-dev unzip locales gosu && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists/* && \
   locale-gen en_US.UTF-8 && \
@@ -27,5 +27,13 @@ RUN apt-get update && \
 
 COPY ./infra/docker/php/php-fpm.d/zzz-www.conf /usr/local/etc/php-fpm.d/zzz-www.conf
 COPY ./infra/docker/php/php.ini /usr/local/etc/php/php.ini
+
+ARG LOCAL_GID
+ARG LOCAL_UID
+ARG LOCAL_USER_NAME
+RUN \
+  groupadd -g ${LOCAL_GID} ${LOCAL_USER_NAME} && \
+  useradd -u ${LOCAL_UID} -g ${LOCAL_USER_NAME} -s /bin/bash -m ${LOCAL_USER_NAME} && \
+  chown -R ${LOCAL_USER_NAME}:${LOCAL_USER_NAME} /composer
 
 WORKDIR /work/backend

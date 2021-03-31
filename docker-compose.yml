@@ -7,6 +7,10 @@ services:
     build:
       context: .
       dockerfile: ./infra/docker/php/Dockerfile
+      args:
+        LOCAL_UID: ${LOCAL_UID}
+        LOCAL_GID: ${LOCAL_GID}
+        LOCAL_USER_NAME: ${LOCAL_USER_NAME}
     volumes:
       - php-fpm-socket:/var/run/php-fpm
       - ./backend:/work/backend
